@@ -24,28 +24,25 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/client"
 	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/cloudwego/hertz/pkg/app/server/binding"
 	"github.com/cloudwego/hertz/pkg/protocol"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 type ValidateStruct struct {
-	A string `query:"a" vd:"test($)"`
+	A string `query:"a"`
 }
 
 func main() {
-	validateConfig := binding.NewValidateConfig()
-	validateConfig.MustRegValidateFunc("test", func(args ...interface{}) error {
-		if len(args) != 1 {
+	h := server.Default(server.WithHostPorts("127.0.0.1:8080"), server.WithCustomValidatorFunc(func(req *protocol.Request, i interface{}) error {
+		args := req.URI().QueryArgs()
+		if args.Len() != 1 {
 			return fmt.Errorf("the args must be one")
 		}
-		s, _ := args[0].(string)
-		if s == "123" {
+		if string(args.Peek("a")) == "123" {
 			return fmt.Errorf("the args can not be 123")
 		}
 		return nil
-	})
-	h := server.Default(server.WithHostPorts("127.0.0.1:8080"))
+	}))
 
 	h.GET("customValidate", func(ctx context.Context, c *app.RequestContext) {
 		var req ValidateStruct
