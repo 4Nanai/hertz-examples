@@ -54,7 +54,7 @@ func main() {
 		// 此外，也可以利用 req, params 来获取其他参数进行参数绑定
 		return reflect.ValueOf(val), nil
 	})
-	h := server.Default(server.WithHostPorts("127.0.0.1:8080"))
+	h := server.Default(server.WithHostPorts("127.0.0.1:8080"), server.WithBindConfig(bindConfig))
 
 	h.GET("customType", func(ctx context.Context, c *app.RequestContext) {
 		var req TestBind
